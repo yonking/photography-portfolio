@@ -105,7 +105,8 @@ export default function Home() {
                   <h3 className="project-title">{project.title}</h3>
                   <div className="project-meta">
                     <span>{project.location}</span>
-                    <span>{project.film}</span>
+             {/* <span>{project.film}</span>*/} 
+<span>{project.film ?? '胶片摄影'}</span>
                   </div>
                   <Link href={`/projects/${project.id}`} className="project-link">
                     查看详情
