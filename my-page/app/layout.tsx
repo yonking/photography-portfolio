@@ -1,16 +1,6 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-
-// 引入谷歌字体
-const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-  title: '你的名字 - 个人主页',
-  description: '酷炫的个人主页 | 前端开发者 | 设计师',
-  icons: {
-    icon: '/favicon.ico',
-  },
+export const metadata = {
+  title: "光影摄影 | 个人作品集",
+  description: "胶片摄影 | 人像 | 风光 | 纪实",
 };
 
 export default function RootLayout({
@@ -20,7 +10,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
