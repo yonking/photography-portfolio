@@ -1,284 +1,181 @@
 'use client';
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { projectsData } from '@/app/data/index';
+import { useParams } from 'next/navigation';
+import { projectsList } from '../../data/index';
+
+// 统一类型定义，和首页完全一致
+type Project = {
+  id: string;
+  title: string;
+  cover: string;
+  videoUrl?: string;
+  gallery?: string[];
+  description: string;
+  location: string;
+  camera: string;
+  film?: string;
+};
 
 export default function ProjectDetail() {
   const params = useParams();
-  const id = params?.id as string;
-  const project = projectsData[id];
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const id = params.id as string;
+  const project = projectsList.find((p: Project) => p.id === id) as Project;
 
-  // 防右键/防F12
-  useState(() => {
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-      if (e.key === 'F12' || 
-         (e.ctrlKey && e.key === 'u') || 
-         (e.ctrlKey && e.shiftKey && e.key === 'i')) {
-        e.preventDefault();
-      }
-    });
-    return () => {
-      document.removeEventListener('contextmenu', e => e.preventDefault());
-      document.removeEventListener('keydown', e => {});
-    };
+  const [currentImage, setCurrentImage] = useState(0);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const [darkMode, setDarkMode] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
-  if (!project) {
-    return (
-      <main style={{ 
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '5vw',
-        fontFamily: 'Times New Roman, Noto Serif SC, serif',
-        backgroundColor: '#121212',
-        color: '#e8e0d6'
-      }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 400, marginBottom: '2rem' }}>作品不存在</h1>
-        <Link 
-          href="/" 
-          style={{ 
-            color: '#e8e0d6',
-            textDecoration: 'none',
-            borderBottom: '1px solid #e8e0d6'
-          }}
-        >
-          返回作品集
-        </Link>
-      </main>
-    );
-  }
+  useEffect(() => {
+    if (!isMounted) return;
+    document.body.className = darkMode ? 'dark' : 'light';
+  }, [darkMode, isMounted]);
+
+  // 核心修复：removeEventListener 正确写法，移除多余的 []
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F12' || (e.ctrlKey && e.key === 'u') || (e.ctrlKey && e.shiftKey && e.key === 'i')) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (cursorRef.current) {
+        cursorRef.current.style.left = `${e.clientX}px`;
+        cursorRef.current.style.top = `${e.clientY}px`;
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [isMounted]);
+
+  if (!isMounted || !project) return null;
+
+  const images = project.gallery || [];
+
+  const nextImage = () => {
+    setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const prevImage = () => {
+    setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
 
   return (
-    <main style={{ 
-      maxWidth: '1920px',
-      margin: '0 auto',
-      padding: 0,
-      fontFamily: 'Times New Roman, Noto Serif SC, serif',
-      backgroundColor: '#121212',
-      color: '#e8e0d6'
-    }}>
-      {/* 返回按钮 */}
-      <div style={{ 
-        position: 'fixed',
-        top: '2rem',
-        left: '5vw',
-        zIndex: 99,
-        mixBlendMode: 'lighten'
-      }}>
-        <Link
-          href="/"
-          style={{
-            color: '#e8e0d6',
-            textDecoration: 'none',
-            fontSize: '0.9rem',
-            letterSpacing: '0.1em',
-            borderBottom: '1px solid transparent',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => e.target.style.borderBottom = '1px solid #e8e0d6'}
-          onMouseLeave={(e) => e.target.style.borderBottom = '1px solid transparent'}
-        >
-          ← 返回
-        </Link>
-      </div>
+    <>
+      <div
+        ref={cursorRef}
+        style={{
+          position: 'fixed',
+          width: '60px',
+          height: '60px',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          zIndex: 9999,
+          transform: 'translate(-50%, -50%)',
+          mixBlendMode: 'lighten',
+          background: 'rgba(0,0,0,0.1)',
+        }}
+      />
 
-      {/* 作品展示区（加水印） */}
-      <section style={{ width: '100%', marginBottom: '6rem' }}>
-        {project.videoUrl ? (
-          // 视频封面加水印
-          <div style={{ 
-            width: '100%',
-            height: '85vh',
-            position: 'relative',
-            padding: '2rem'
-          }}>
-            <div className="watermark" style={{ 
-              width: '100%',
-              height: '100%',
-             border: '12px solid #1a1a1a',
-              boxShadow: '0 0 0 1px #333',
-              position: 'relative'
-            }}>
-              <iframe
-                width="100%"
-                height="100%"
-                src={project.videoUrl}
-                title={project.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                style={{ display: 'block', filter: 'sepia(10%)' }}
-              />
-              {/* 视频区水印 */}
-              <div style={{
-                content: '',
-                position: 'absolute',
-                bottom: 20,
-                right: 20,
-                color: '#ffffff',
-                opacity: 0.3,
-                fontSize: 14,
-                letterSpacing: '0.1em',
-                zIndex: 10,
-                pointerEvents: 'none',
-                userSelect: 'none'
-              }}>© 你的名字 Photography</div>
+      <main className="main-container">
+        <nav className="navbar">
+          <h2 className="logo">LIGHT & SHADOW</h2>
+          <button onClick={() => setDarkMode(!darkMode)} className="mode-btn">
+            {darkMode ? '📸 亮调' : '🎞️ 暗调'}
+          </button>
+        </nav>
+
+        <section className="project-detail-section">
+          <div className="project-header">
+            <h1 className="project-title">{project.title}</h1>
+            <div className="project-meta">
+              <span>{project.location}</span>
+              <span>{project.film ?? '胶片摄影'}</span>
+              <span>{project.camera}</span>
             </div>
           </div>
-        ) : project.gallery ? (
-          // 图集加水印
-          <div style={{ 
-            width: '100%',
-            height: '85vh',
-            position: 'relative',
-            padding: '2rem'
-          }}>
-            <div className="watermark" style={{ 
-              width: '100%',
-              height: '100%',
-              border: '12px solid #1a1a1a',
-              boxShadow: '0 0 0 1px #333',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
+
+          <div className="image-gallery">
+            <div className="main-image-wrapper watermark">
               <Image
-                src={project.gallery[currentImageIndex]}
-                alt={`${project.title} - 第${currentImageIndex+1}张`}
-                fill
-                style={{ objectFit: 'cover', filter: 'sepia(10%) contrast(1.1)' }}
-                priority
-                className="project-img"
-              />
-              <button
-                onClick={() => setCurrentImageIndex((prev) => (prev === 0 ? project.gallery.length - 1 : prev - 1))}
-                style={{
-                  position: 'absolute',
-                  left: '2rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'rgba(0,0,0,0.5)',
-                  color: '#fff',
-                  border: '1px solid #666',
-                  width: '40px',
-                  height: '40px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                ‹
-              </button>
-              <button
-                onClick={() => setCurrentImageIndex((prev) => (prev === project.gallery.length - 1 ? 0 : prev + 1))}
-                style={{
-                  position: 'absolute',
-                  right: '2rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'rgba(0,0,0,0.5)',
-                  color: '#fff',
-                  border: '1px solid #666',
-                  width: '40px',
-                  height: '40px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                ›
-              </button>
-              <div style={{ 
-                position: 'absolute',
-                bottom: '1.5rem',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'rgba(0,0,0,0.6)',
-                padding: '0.5rem 1rem',
-                border: '1px solid #666',
-                color: '#fff',
-                fontSize: '0.8rem',
-                letterSpacing: '0.1em'
-              }}>
-                {currentImageIndex + 1} / {project.gallery.length}
-              </div>
-            </div>
-          </div>
-        ) : (
-          // 单张封面图加水印
-          <div style={{ 
-            width: '100%',
-            height: '85vh',
-            position: 'relative',
-            padding: '2rem'
-          }}>
-            <div className="watermark" style={{ 
-              width: '100%',
-              height: '100%',
-              border: '12px solid #1a1a1a',
-              boxShadow: '0 0 0 1px #333',
-              position: 'relative'
-            }}>
-              <Image
-                src={project.cover}
+                src={images[currentImage] || project.cover}
                 alt={project.title}
                 fill
-                style={{ objectFit: 'cover', filter: 'sepia(10%) contrast(1.1)' }}
+                style={{ objectFit: 'contain' }}
                 priority
-                className="project-img"
+                className="main-image"
               />
+              <button className="nav-btn prev-btn" onClick={prevImage}>
+                ←
+              </button>
+              <button className="nav-btn next-btn" onClick={nextImage}>
+                →
+              </button>
+            </div>
+
+            <div className="thumbnail-grid">
+              {images.map((img, index) => (
+                <div
+                  key={index}
+                  className={`thumbnail ${index === currentImage ? 'active' : ''}`}
+                  onClick={() => setCurrentImage(index)}
+                >
+                  <Image
+                    src={img}
+                    alt={`${project.title} ${index + 1}`}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
-        )}
-      </section>
 
-      {/* 作品信息区 */}
-      <section style={{ 
-        padding: '0 8vw 8rem',
-        maxWidth: '1000px',
-        margin: '0 auto'
-      }}>
-        <h1 style={{ 
-          fontSize: 'clamp(2rem, 4vw, 3rem)',
-          fontWeight: 400,
-          lineHeight: 1.2,
-          marginBottom: '2rem',
-          letterSpacing: '0.05em'
-        }}>
-          {project.title}
-        </h1>
-        
-        <div style={{ 
-          display: 'flex',
-          gap: '2rem',
-          marginBottom: '3rem',
-          paddingBottom: '1rem',
-          borderBottom: '1px solid #222',
-          flexWrap: 'wrap'
-        }}>
-          <span style={{ fontSize: '0.9rem', color: '#999' }}>{project.location}</span>
-          <span style={{ fontSize: '0.9rem', color: '#999' }}>{project.camera}</span>
-          <span style={{ fontSize: '0.9rem', color: '#999' }}>{project.film}</span>
-        </div>
-        
-        <p style={{ 
-          fontSize: '1.1rem',
-          lineHeight: 1.8,
-          color: '#ccc',
-          fontWeight: 400,
-          letterSpacing: '0.02em'
-        }}>
-          {project.description}
-        </p>
-      </section>
+          <div className="project-description">
+            <p>{project.description}</p>
+          </div>
 
-      {/* 详情页水印样式 */}
+          <a href="/#projects" className="back-btn">
+            ← 返回作品集
+          </a>
+        </section>
+
+        <footer className="footer">
+          <p>© 2026 LIGHT & SHADOW · 所有作品均为原创拍摄</p>
+          <div className="footer-meta">
+            <span>禁止转载 | 版权所有</span>
+          </div>
+        </footer>
+      </main>
+
       <style jsx global>{`
-        /* 防图片盗用基础样式 */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Times New Roman', 'Noto Serif SC', serif;
+          cursor: none;
+        }
+
         img {
           user-select: none;
           -webkit-user-drag: none;
@@ -286,8 +183,17 @@ export default function ProjectDetail() {
           pointer-events: none;
         }
 
-        /* 详情页水印 */
-        .watermark::after {
+        .dark {
+          background-color: #121212;
+          color: #e8e0d6;
+        }
+
+        .light {
+          background-color: #f5f0eb;
+          color: #2d241b;
+        }
+
+        .dark .watermark::after {
           content: '© 你的名字 Photography';
           position: absolute;
           bottom: 20px;
@@ -300,7 +206,162 @@ export default function ProjectDetail() {
           pointer-events: none;
           user-select: none;
         }
+
+        .light .watermark::after {
+          content: '© 你的名字 Photography';
+          position: absolute;
+          bottom: 20px;
+          right: 20px;
+          color: #000000;
+          opacity: 0.3;
+          font-size: 14px;
+          letter-spacing: 0.1em;
+          z-index: 10;
+          pointer-events: none;
+          user-select: none;
+        }
+
+        .main-container {
+          max-width: 1800px;
+          margin: 0 auto;
+          padding: 0 5vw;
+          overflow-x: hidden;
+        }
+
+        .navbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 3rem 0;
+        }
+
+        .logo {
+          font-size: 1.2rem;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+        }
+
+        .mode-btn {
+          padding: 0.5rem 1rem;
+          border: 1px solid #888;
+          background: transparent;
+          cursor: pointer;
+          border-radius: 0;
+          transition: all 0.3s ease;
+        }
+
+        .project-detail-section {
+          margin-bottom: 10rem;
+        }
+
+        .project-header {
+          margin-bottom: 4rem;
+          text-align: center;
+        }
+
+        .project-title {
+          font-size: 2.5rem;
+          font-weight: 400;
+          margin-bottom: 1.5rem;
+          letter-spacing: 0.1em;
+        }
+
+        .project-meta {
+          display: flex;
+          justify-content: center;
+          gap: 2rem;
+          font-size: 0.9rem;
+          letter-spacing: 0.1em;
+        }
+
+        .image-gallery {
+          margin-bottom: 4rem;
+        }
+
+        .main-image-wrapper {
+          width: 100%;
+          height: 70vh;
+          position: relative;
+          margin-bottom: 2rem;
+          border: 12px solid #1a1a1a;
+          box-shadow: 0 0 0 1px #333, 0 10px 30px rgba(0,0,0,0.1);
+          overflow: hidden;
+        }
+
+        .main-image {
+          filter: sepia(10%) contrast(1.1);
+        }
+
+        .nav-btn {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(0,0,0,0.5);
+          border: none;
+          color: #fff;
+          font-size: 2rem;
+          padding: 1rem;
+          cursor: pointer;
+          z-index: 100;
+          transition: all 0.3s ease;
+        }
+
+        .prev-btn {
+          left: 20px;
+        }
+
+        .next-btn {
+          right: 20px;
+        }
+
+        .thumbnail-grid {
+          display: flex;
+          gap: 1rem;
+          overflow-x: auto;
+          padding: 1rem 0;
+        }
+
+        .thumbnail {
+          width: 120px;
+          height: 80px;
+          position: relative;
+          border: 2px solid transparent;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .thumbnail.active {
+          border-color: #888;
+        }
+
+        .project-description {
+          max-width: 800px;
+          margin: 0 auto 4rem;
+          line-height: 1.8;
+          font-size: 1.1rem;
+        }
+
+        .back-btn {
+          display: inline-block;
+          padding: 1rem 2rem;
+          border: 1px solid currentColor;
+          text-decoration: none;
+          letter-spacing: 0.1em;
+          transition: all 0.4s ease;
+        }
+
+        .footer {
+          padding: 6rem 0 3rem;
+          border-top: 1px solid #333;
+          text-align: center;
+        }
+
+        .footer p {
+          font-size: 0.9rem;
+          margin-bottom: 1rem;
+          letter-spacing: 0.1em;
+        }
       `}</style>
-    </main>
+    </>
   );
 }
