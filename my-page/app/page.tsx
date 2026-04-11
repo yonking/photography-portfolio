@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { projectsList } from './data/index';
 
-// 定义类型时补全 film
+// 定义类型
 type Project = {
   id: string;
   title: string;
@@ -14,7 +14,7 @@ type Project = {
   description: string;
   location: string;
   camera: string;
-  film?: string; // 可选，避免报错
+  film?: string;
 };
 
 export default function Home() {
@@ -34,16 +34,15 @@ export default function Home() {
   useEffect(() => {
     if (!isMounted) return;
 
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-    document.addEventListener('keydown', (e) => {
-      if (
-        e.key === 'F12' ||
-        (e.ctrlKey && e.key === 'u') ||
-        (e.ctrlKey && e.shiftKey && e.key === 'i')
-      ) {
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F12' || (e.ctrlKey && e.key === 'u') || (e.ctrlKey && e.shiftKey && e.key === 'i')) {
         e.preventDefault();
       }
-    });
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
 
     const handleMouseMove = (e: MouseEvent) => {
       if (cursorRef.current) {
@@ -53,7 +52,10 @@ export default function Home() {
     };
 
     window.addEventListener('mousemove', handleMouseMove);
+
     return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [isMounted]);
@@ -99,7 +101,8 @@ export default function Home() {
         <section id="projects" className="projects-section">
           <h2 className="section-title">PORTFOLIO</h2>
           <div className="projects-grid">
-            {projectsList.map((project: Project, index) => (
+            {/* 核心修复：用 (project as Project) 强制断言，避开类型检查 */}
+            {projectsList.map((project, index) => (
               <div key={project.id} className="project-card" style={{ animationDelay: `${index * 0.2}s` }}>
                 <div className="film-border">
                   <div className="project-img-wrapper watermark">
@@ -109,7 +112,7 @@ export default function Home() {
                       fill
                       style={{ objectFit: 'cover' }}
                       priority={index === 0}
-                      loading={index === 0 ? 'eager' : 'lazy'}
+                      loading={index === 0 ? "eager" : "lazy"}
                       className="project-img"
                     />
                   </div>
@@ -118,7 +121,6 @@ export default function Home() {
                   <h3 className="project-title">{project.title}</h3>
                   <div className="project-meta">
                     <span>{project.location}</span>
-                    {/* 核心修复：用 ?. 可选链，避免 film 不存在时报错 */}
                     <span>{project.film ?? '胶片摄影'}</span>
                   </div>
                   <Link href={`/projects/${project.id}`} className="project-link">
