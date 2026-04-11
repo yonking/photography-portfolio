@@ -4,17 +4,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { projectsList } from './data/index';
 
-// 定义完整类型，film 设为可选
+// 定义类型：gallery 设为可选，彻底解决类型报错
 type Project = {
   id: string;
   title: string;
   cover: string;
   videoUrl?: string;
-  gallery: string[];
+  gallery?: string[]; // 可选属性
   description: string;
   location: string;
   camera: string;
-  film?: string; // 可选属性，避免类型报错
+  film?: string;
 };
 
 export default function Home() {
@@ -120,7 +120,6 @@ export default function Home() {
                   <h3 className="project-title">{project.title}</h3>
                   <div className="project-meta">
                     <span>{project.location}</span>
-                    {/* 核心修复：正确的 ?? 语法，类型已兼容 */}
                     <span>{project.film ?? '胶片摄影'}</span>
                   </div>
                   <Link href={`/projects/${project.id}`} className="project-link">
