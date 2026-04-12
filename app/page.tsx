@@ -63,22 +63,63 @@ export default function Home() {
 
   return (
     <>
-      {/* 核心修复：鼠标样式根据明暗模式自动适配，彻底解决亮调消失问题 */}
-      <div
-        ref={cursorRef}
-        style={{
-          position: 'fixed',
-          width: '60px',
-          height: '60px',
-          border: darkMode ? '1px solid rgba(255,255,255,0.5)' : '1px solid rgba(0,0,0,0.3)',
-          borderRadius: '50%',
-          pointerEvents: 'none',
-          zIndex: 9999,
-          transform: 'translate(-50%, -50%)',
-          background: darkMode ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
-          mixBlendMode: 'normal', // 移除lighten，彻底解决融合消失问题
-        }}
-      />
+
+      {/* 📸 相机光圈镜头鼠标（核心修改部分） */}
+ <div
+  ref={cursorRef}
+  style={{
+    position: 'fixed',
+    width: '44px',
+    height: '44px',
+    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'}`,
+    borderRadius: '50%',
+    pointerEvents: 'none',
+    zIndex: 9999,
+    transform: 'translate(-50%, -50%)',
+    background: 'transparent',
+    mixBlendMode: 'normal',
+  }}
+>
+  {/* 取景十字线 */}
+  <div
+    style={{
+      position: 'absolute',
+      width: '1px',
+      height: '16px',
+      background: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    }}
+  />
+  <div
+    style={{
+      position: 'absolute',
+      width: '16px',
+      height: '1px',
+      background: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    }}
+  />
+  {/* 中心红点 */}
+  <div
+    style={{
+      position: 'absolute',
+      width: '3px',
+      height: '3px',
+      background: darkMode ? '#ff4d4f' : '#dc2626',
+      borderRadius: '50%',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    }}
+  />
+</div>
+
+
+
 
       <main className="main-container">
         <nav className="navbar">

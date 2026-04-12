@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { projectsList } from '../../data/index';
 
-// 统一类型定义，和首页完全一致
 type Project = {
   id: string;
   title: string;
@@ -36,7 +35,6 @@ export default function ProjectDetail() {
     document.body.className = darkMode ? 'dark' : 'light';
   }, [darkMode, isMounted]);
 
-  // 核心修复：removeEventListener 正确写法，移除多余的 []
   useEffect(() => {
     if (!isMounted) return;
 
@@ -86,15 +84,69 @@ export default function ProjectDetail() {
           position: 'fixed',
           width: '60px',
           height: '60px',
-          border: '1px solid rgba(255,255,255,0.3)',
+          border: darkMode ? '1px solid rgba(255,255,255,0.5)' : '1px solid rgba(0,0,0,0.4)',
           borderRadius: '50%',
           pointerEvents: 'none',
           zIndex: 9999,
           transform: 'translate(-50%, -50%)',
-          mixBlendMode: 'lighten',
-          background: 'rgba(0,0,0,0.1)',
+          background: 'transparent',
+          mixBlendMode: 'normal',
         }}
       />
+
+      {/* 📸 相机光圈镜头鼠标（核心修改部分） */}
+ <div
+  ref={cursorRef}
+  style={{
+    position: 'fixed',
+    width: '44px',
+    height: '44px',
+    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'}`,
+    borderRadius: '50%',
+    pointerEvents: 'none',
+    zIndex: 9999,
+    transform: 'translate(-50%, -50%)',
+    background: 'transparent',
+    mixBlendMode: 'normal',
+  }}
+>
+  {/* 取景十字线 */}
+  <div
+    style={{
+      position: 'absolute',
+      width: '1px',
+      height: '16px',
+      background: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    }}
+  />
+  <div
+    style={{
+      position: 'absolute',
+      width: '16px',
+      height: '1px',
+      background: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    }}
+  />
+  {/* 中心红点 */}
+  <div
+    style={{
+      position: 'absolute',
+      width: '3px',
+      height: '3px',
+      background: darkMode ? '#ff4d4f' : '#dc2626',
+      borderRadius: '50%',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    }}
+  />
+</div>
 
       <main className="main-container">
         <nav className="navbar">
@@ -124,27 +176,14 @@ export default function ProjectDetail() {
                 priority
                 className="main-image"
               />
-              <button className="nav-btn prev-btn" onClick={prevImage}>
-                ←
-              </button>
-              <button className="nav-btn next-btn" onClick={nextImage}>
-                →
-              </button>
+              <button className="nav-btn prev-btn" onClick={prevImage}>←</button>
+              <button className="nav-btn next-btn" onClick={nextImage}>→</button>
             </div>
 
             <div className="thumbnail-grid">
               {images.map((img, index) => (
-                <div
-                  key={index}
-                  className={`thumbnail ${index === currentImage ? 'active' : ''}`}
-                  onClick={() => setCurrentImage(index)}
-                >
-                  <Image
-                    src={img}
-                    alt={`${project.title} ${index + 1}`}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
+                <div key={index} className={`thumbnail ${index === currentImage ? 'active' : ''}`} onClick={() => setCurrentImage(index)}>
+                  <Image src={img} alt={`${project.title} ${index + 1}`} fill style={{ objectFit: 'cover' }} />
                 </div>
               ))}
             </div>
@@ -154,9 +193,7 @@ export default function ProjectDetail() {
             <p>{project.description}</p>
           </div>
 
-          <a href="/#projects" className="back-btn">
-            ← 返回作品集
-          </a>
+          <a href="/#projects" className="back-btn">← 返回作品集</a>
         </section>
 
         <footer className="footer">
@@ -306,13 +343,8 @@ export default function ProjectDetail() {
           transition: all 0.3s ease;
         }
 
-        .prev-btn {
-          left: 20px;
-        }
-
-        .next-btn {
-          right: 20px;
-        }
+        .prev-btn { left: 20px; }
+        .next-btn { right: 20px; }
 
         .thumbnail-grid {
           display: flex;
