@@ -4,13 +4,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { projectsList } from './data/index';
 
-// 定义类型：gallery 设为可选，彻底解决类型报错
 type Project = {
   id: string;
   title: string;
   cover: string;
   videoUrl?: string;
-  gallery?: string[]; // 可选属性
+  gallery?: string[];
   description: string;
   location: string;
   camera: string;
@@ -64,19 +63,20 @@ export default function Home() {
 
   return (
     <>
+      {/* 核心修复：鼠标样式根据明暗模式自动适配，彻底解决亮调消失问题 */}
       <div
         ref={cursorRef}
         style={{
           position: 'fixed',
           width: '60px',
           height: '60px',
-          border: '1px solid rgba(255,255,255,0.3)',
+          border: darkMode ? '1px solid rgba(255,255,255,0.5)' : '1px solid rgba(0,0,0,0.3)',
           borderRadius: '50%',
           pointerEvents: 'none',
           zIndex: 9999,
           transform: 'translate(-50%, -50%)',
-          mixBlendMode: 'lighten',
-          background: 'rgba(0,0,0,0.1)',
+          background: darkMode ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
+          mixBlendMode: 'normal', // 移除lighten，彻底解决融合消失问题
         }}
       />
 
