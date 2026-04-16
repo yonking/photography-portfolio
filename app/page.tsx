@@ -63,63 +63,40 @@ export default function Home() {
 
   return (
     <>
-
-      {/* 📸 相机光圈镜头鼠标（核心修改部分） */}
- <div
-  ref={cursorRef}
-  style={{
-    position: 'fixed',
-    width: '44px',
-    height: '44px',
-    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'}`,
-    borderRadius: '50%',
-    pointerEvents: 'none',
-    zIndex: 9999,
-    transform: 'translate(-50%, -50%)',
-    background: 'transparent',
-    mixBlendMode: 'normal',
-  }}
->
-  {/* 取景十字线 */}
-  <div
-    style={{
-      position: 'absolute',
-      width: '1px',
-      height: '16px',
-      background: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    }}
-  />
-  <div
-    style={{
-      position: 'absolute',
-      width: '16px',
-      height: '1px',
-      background: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    }}
-  />
-  {/* 中心红点 */}
-  <div
-    style={{
-      position: 'absolute',
-      width: '3px',
-      height: '3px',
-      background: darkMode ? '#ff4d4f' : '#dc2626',
-      borderRadius: '50%',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    }}
-  />
-</div>
-
-
-
+      {/* 相机镜头鼠标 */}
+      <div
+        ref={cursorRef}
+        style={{
+          position: 'fixed',
+          width: '48px',
+          height: '48px',
+          border: `2px solid ${darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'}`,
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          zIndex: 9999,
+          transform: 'translate(-50%, -50%)',
+          background: 'transparent',
+          mixBlendMode: 'normal',
+          boxShadow: `
+            inset 0 0 0 1px ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'},
+            0 0 0 3px ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}
+          `,
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            width: '4px',
+            height: '4px',
+            background: darkMode ? '#ff4d4f' : '#dc2626',
+            borderRadius: '50%',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            boxShadow: `0 0 4px ${darkMode ? 'rgba(255,77,79,0.8)' : 'rgba(220,38,38,0.7)'}`,
+          }}
+        />
+      </div>
 
       <main className="main-container">
         <nav className="navbar">
@@ -130,13 +107,9 @@ export default function Home() {
         </nav>
 
         <section className="hero-section">
-          <h1 className="hero-title">
-            每一帧<br />都是时光的底片
-          </h1>
+          <h1 className="hero-title">每一帧<br />都是时光的底片</h1>
           <p className="hero-subtitle">人像 · 风光 · 纪实 | 胶片摄影</p>
-          <Link href="#projects" className="explore-btn">
-            浏览作品集 →
-          </Link>
+          <Link href="#projects" className="explore-btn">浏览作品集 →</Link>
         </section>
 
         <section id="projects" className="projects-section">
@@ -150,7 +123,10 @@ export default function Home() {
                       src={project.cover}
                       alt={project.title}
                       fill
-                      style={{ objectFit: 'cover' }}
+                      style={{
+                        objectFit: 'cover',
+                        objectPosition: 'center',
+                      }}
                       priority={index === 0}
                       loading={index === 0 ? "eager" : "lazy"}
                       className="project-img"
@@ -163,9 +139,7 @@ export default function Home() {
                     <span>{project.location}</span>
                     <span>{project.film ?? '胶片摄影'}</span>
                   </div>
-                  <Link href={`/projects/${project.id}`} className="project-link">
-                    查看详情
-                  </Link>
+                  <Link href={`/projects/${project.id}`} className="project-link">查看详情</Link>
                 </div>
               </div>
             ))}
@@ -206,6 +180,7 @@ export default function Home() {
           color: #2d241b;
         }
 
+        /* 水印配色自动切换 */
         .dark .watermark::after {
           content: '© 你的名字 Photography';
           position: absolute;
@@ -226,7 +201,7 @@ export default function Home() {
           bottom: 20px;
           right: 20px;
           color: #000000;
-          opacity: 0.3;
+          opacity: 0.25;
           font-size: 14px;
           letter-spacing: 0.1em;
           z-index: 10;
@@ -311,8 +286,9 @@ export default function Home() {
 
         .projects-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-          gap: 6rem;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 3rem 2rem;
+          padding: 0 1rem;
         }
 
         .project-card {
@@ -328,17 +304,28 @@ export default function Home() {
           }
         }
 
+        /* 边框：暗色黑 / 亮色浅米色 */
         .film-border {
-          border: 12px solid #1a1a1a;
-          box-shadow: 0 0 0 1px #333, 0 10px 30px rgba(0,0,0,0.1);
           margin-bottom: 1.5rem;
+          width: 100%;
+          box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 10px 30px rgba(0,0,0,0.06);
+          transition: border 0.3s ease;
+        }
+        .dark .film-border {
+          border: 12px solid #1a1a1a;
+        }
+        .light .film-border {
+          border: 12px solid #e2ddd6;
         }
 
         .project-img-wrapper {
-          width: 100%;
-          height: 450px;
           position: relative;
+          width: 100%;
+          height: 320px;
           overflow: hidden;
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
 
         .project-img {
@@ -380,6 +367,21 @@ export default function Home() {
           font-size: 0.9rem;
           margin-bottom: 1rem;
           letter-spacing: 0.1em;
+        }
+
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+          .projects-grid {
+            grid-template-columns: 1fr;
+            gap: 2.5rem 0;
+          }
+          .project-img-wrapper {
+            height: 260px;
+          }
+          .dark .film-border,
+          .light .film-border {
+            border-width: 8px;
+          }
         }
       `}</style>
     </>

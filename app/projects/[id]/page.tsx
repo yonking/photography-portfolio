@@ -78,75 +78,40 @@ export default function ProjectDetail() {
 
   return (
     <>
+      {/* 同一款镜头鼠标 */}
       <div
         ref={cursorRef}
         style={{
           position: 'fixed',
-          width: '60px',
-          height: '60px',
-          border: darkMode ? '1px solid rgba(255,255,255,0.5)' : '1px solid rgba(0,0,0,0.4)',
+          width: '48px',
+          height: '48px',
+          border: `2px solid ${darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'}`,
           borderRadius: '50%',
           pointerEvents: 'none',
           zIndex: 9999,
           transform: 'translate(-50%, -50%)',
           background: 'transparent',
           mixBlendMode: 'normal',
+          boxShadow: `
+            inset 0 0 0 1px ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'},
+            0 0 0 3px ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}
+          `,
         }}
-      />
-
-      {/* 📸 相机光圈镜头鼠标（核心修改部分） */}
- <div
-  ref={cursorRef}
-  style={{
-    position: 'fixed',
-    width: '44px',
-    height: '44px',
-    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'}`,
-    borderRadius: '50%',
-    pointerEvents: 'none',
-    zIndex: 9999,
-    transform: 'translate(-50%, -50%)',
-    background: 'transparent',
-    mixBlendMode: 'normal',
-  }}
->
-  {/* 取景十字线 */}
-  <div
-    style={{
-      position: 'absolute',
-      width: '1px',
-      height: '16px',
-      background: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    }}
-  />
-  <div
-    style={{
-      position: 'absolute',
-      width: '16px',
-      height: '1px',
-      background: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    }}
-  />
-  {/* 中心红点 */}
-  <div
-    style={{
-      position: 'absolute',
-      width: '3px',
-      height: '3px',
-      background: darkMode ? '#ff4d4f' : '#dc2626',
-      borderRadius: '50%',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    }}
-  />
-</div>
+      >
+        <div
+          style={{
+            position: 'absolute',
+            width: '4px',
+            height: '4px',
+            background: darkMode ? '#ff4d4f' : '#dc2626',
+            borderRadius: '50%',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            boxShadow: `0 0 4px ${darkMode ? 'rgba(255,77,79,0.8)' : 'rgba(220,38,38,0.7)'}`,
+          }}
+        />
+      </div>
 
       <main className="main-container">
         <nav className="navbar">
@@ -172,7 +137,10 @@ export default function ProjectDetail() {
                 src={images[currentImage] || project.cover}
                 alt={project.title}
                 fill
-                style={{ objectFit: 'contain' }}
+                style={{
+                  objectFit: 'contain',
+                  objectPosition: 'center',
+                }}
                 priority
                 className="main-image"
               />
@@ -224,7 +192,6 @@ export default function ProjectDetail() {
           background-color: #121212;
           color: #e8e0d6;
         }
-
         .light {
           background-color: #f5f0eb;
           color: #2d241b;
@@ -238,24 +205,17 @@ export default function ProjectDetail() {
           color: #ffffff;
           opacity: 0.3;
           font-size: 14px;
-          letter-spacing: 0.1em;
           z-index: 10;
-          pointer-events: none;
-          user-select: none;
         }
-
         .light .watermark::after {
           content: '© 你的名字 Photography';
           position: absolute;
           bottom: 20px;
           right: 20px;
           color: #000000;
-          opacity: 0.3;
+          opacity: 0.25;
           font-size: 14px;
-          letter-spacing: 0.1em;
           z-index: 10;
-          pointer-events: none;
-          user-select: none;
         }
 
         .main-container {
@@ -282,8 +242,6 @@ export default function ProjectDetail() {
           padding: 0.5rem 1rem;
           border: 1px solid #888;
           background: transparent;
-          cursor: pointer;
-          border-radius: 0;
           transition: all 0.3s ease;
         }
 
@@ -315,14 +273,23 @@ export default function ProjectDetail() {
           margin-bottom: 4rem;
         }
 
+        /* 详情页大图边框：暗色黑 / 亮色浅米色 */
         .main-image-wrapper {
+          position: relative;
           width: 100%;
           height: 70vh;
-          position: relative;
           margin-bottom: 2rem;
-          border: 12px solid #1a1a1a;
-          box-shadow: 0 0 0 1px #333, 0 10px 30px rgba(0,0,0,0.1);
           overflow: hidden;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: border 0.3s ease;
+        }
+        .dark .main-image-wrapper {
+          border: 12px solid #1a1a1a;
+        }
+        .light .main-image-wrapper {
+          border: 12px solid #e2ddd6;
         }
 
         .main-image {
@@ -338,11 +305,9 @@ export default function ProjectDetail() {
           color: #fff;
           font-size: 2rem;
           padding: 1rem;
-          cursor: pointer;
+          cursor: none;
           z-index: 100;
-          transition: all 0.3s ease;
         }
-
         .prev-btn { left: 20px; }
         .next-btn { right: 20px; }
 
@@ -352,16 +317,13 @@ export default function ProjectDetail() {
           overflow-x: auto;
           padding: 1rem 0;
         }
-
         .thumbnail {
           width: 120px;
           height: 80px;
           position: relative;
           border: 2px solid transparent;
-          cursor: pointer;
-          transition: all 0.3s ease;
+          cursor: none;
         }
-
         .thumbnail.active {
           border-color: #888;
         }
@@ -371,6 +333,7 @@ export default function ProjectDetail() {
           margin: 0 auto 4rem;
           line-height: 1.8;
           font-size: 1.1rem;
+          text-align: left;
         }
 
         .back-btn {
@@ -379,7 +342,6 @@ export default function ProjectDetail() {
           border: 1px solid currentColor;
           text-decoration: none;
           letter-spacing: 0.1em;
-          transition: all 0.4s ease;
         }
 
         .footer {
@@ -388,10 +350,15 @@ export default function ProjectDetail() {
           text-align: center;
         }
 
-        .footer p {
-          font-size: 0.9rem;
-          margin-bottom: 1rem;
-          letter-spacing: 0.1em;
+        /* 手机端 */
+        @media (max-width: 768px) {
+          .main-image-wrapper {
+            height: 48vh;
+          }
+          .dark .main-image-wrapper,
+          .light .main-image-wrapper {
+            border-width: 8px;
+          }
         }
       `}</style>
     </>
