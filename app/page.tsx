@@ -229,15 +229,29 @@ export default function Home() {
           text-transform: uppercase;
         }
 
-        .mode-btn {
+      /*   .mode-btn {
           padding: 0.5rem 1rem;
           border: 1px solid #888;
           background: transparent;
           cursor: pointer;
           border-radius: 0;
           transition: all 0.3s ease;
-        }
+        }*/
+.mode-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #888;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.3s ease;
+  /* 亮模式：深灰文字 */
+  color: #2d241b;
+}
 
+/* 暗模式：白色文字 */
+.dark .mode-btn {
+  color: #e8e0d6;
+}
         .hero-section {
           min-height: 70vh;
           display: flex;
